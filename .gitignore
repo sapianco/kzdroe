@@ -1,3 +1,12 @@
+# tmp files
+tmp/
+
+# Examples
+local-examples/
+
+# Docker Default Enviroment Variables
+.env
+
 # ---> Python
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -24,6 +33,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+*Pipfile.lock
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -58,3 +68,4 @@ docs/_build/
 # PyBuilder
 target/
 
+learn/

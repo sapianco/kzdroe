@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kzdroe.fullname" . }}
+  labels:
+    {{- include "kzdroe.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  {{- if .Values.metrics.nginx.enabled }}
+    - name: nginx-metrics
+      port: 9113
+      targetPort: nginx-metrics
+  {{- end }}
+  {{- if .Values.metrics.uwsgi.enabled }}
+    - name: uwsgi-metrics
+      port: 9117
+      targetPort: uwsgi-metrics
+  {{- end }}
+  selector:
+    {{- include "kzdroe.selectorLabels" . | nindent 4 }}
