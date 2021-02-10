@@ -5,7 +5,7 @@ Here is a simple Python Flask for receiving a recording from doe.dialbox.cloud.
 # Build And Push to docker registry
 
 ``` Bash
-docker build -t sapian/kzdroe:0.1.1 -t sapian/kzdroe:latest -t us.gcr.io/sapiancomco-1531131691088/sapian/kzdroe:0.1.1 .
+docker build -t sapian/kzdroe:0.2.1 -t sapian/kzdroe:latest -t us.gcr.io/sapiancomco-1531131691088/sapian/kzdroe:0.2.1 .
 ```
 
 # Run For Testing
