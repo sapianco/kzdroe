@@ -11,6 +11,7 @@ ENV APP_METRICS_PORT 9531
 ENV NGINX_METRICS_PORT 9532
 ENV UWSGI_STATS_PORT 1717
 ENV prometheus_multiproc_dir /tmp
+ENV ENCOPUS 1
 
 # set work directory
 WORKDIR /usr/src/app/
@@ -19,7 +20,8 @@ WORKDIR /usr/src/app/
 RUN apk --no-cache add bash \
 	curl  \
 	git \
-	py3-magic
+	py3-magic \
+	opus-tools
 
 # RUN apk add --no-cache --virtual .build-deps \
 # 		gcc \

@@ -35,9 +35,14 @@ from flask import Flask
 from flask import request
 from prometheus_flask_exporter import PrometheusMetrics
 from prometheus_flask_exporter.multiprocess import UWsgiPrometheusMetrics
+from shutil import copyfile, which
+from subprocess import Popen
+
+SOURCE_AUDIO_EXTENSIONS = ['.wav']
 
 LOG_LEVEL = os.environ.get('LOG_LEVEL', "INFO").upper()
 METRICS_PORT = int(os.environ.get('METRICS_PORT', "9531"))
+ENCOPUS = int(os.environ.get('ENCOPUS', "1"))
 
 logging.basicConfig(level=LOG_LEVEL)
 log = logging.getLogger('KZDROE')
@@ -47,6 +52,7 @@ metrics = UWsgiPrometheusMetrics(app, group_by='endpoint')
 metrics.info('app_info', 'Application info', version=__version__)
 metrics.register_endpoint('/metrics')
 metrics.start_http_server(METRICS_PORT)
+
 
 @app.route('/ping', methods=['GET'])
 def ping():
@@ -71,9 +77,35 @@ def upload(accountid, userid, recfile):
     with open(dstfile, 'wb') as f:
         print(dir(request))
         f.write(request.data)
-    return 'OK {} {}'.format(dstfile, request.path)
-
+    if ENCOPUS:
+        opusdstfile = os.path.splitext(dstfile)[0] + ".opus"
+        log.info(
+            'running: opusenc --speech {} {}'.format(
+                dstfile, 
+                opusdstfile
+            )
+        )
+        if Popen(
+            [
+                'opusenc',
+                '--speech', 
+                dstfile, 
+                opusdstfile 
+            ]).wait() == 0:
+            log.info(
+                'converted {} -> {}'.format(
+                    dstfile, 
+                    opusdstfile
+                )
+            )
+        return 'OK {} {}'.format(opusdstfile, request.path)
+    else:
+        return 'OK {} {}'.format(dstfile, request.path)
 
 if __name__ == '__main__':
+    if ENCOPUS:
+        if which('opusenc') is None:
+            log.error("ERROR: opusenc not found in PATH - please make sure it's installed")
+            exit(1)
     metrics.start_http_server(METRICS_PORT)
     app.run(host='0.0.0.0')
