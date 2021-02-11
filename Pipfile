@@ -10,6 +10,7 @@ python-language-server = {version = "*",extras = ["all"]}
 [packages]
 Flask = "*"
 prometheus-flask-exporter = "*"
+boto3 = "*"
 
 [requires]
 python_version = "3"

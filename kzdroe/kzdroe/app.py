@@ -31,8 +31,10 @@ __status__ = "Beta"
 
 import os
 import logging
+from datetime import datetime
 from flask import Flask
 from flask import request
+from flask import jsonify
 from prometheus_flask_exporter import PrometheusMetrics
 from prometheus_flask_exporter.multiprocess import UWsgiPrometheusMetrics
 from shutil import copyfile, which
@@ -42,7 +44,8 @@ SOURCE_AUDIO_EXTENSIONS = ['.wav']
 
 LOG_LEVEL = os.environ.get('LOG_LEVEL', "INFO").upper()
 METRICS_PORT = int(os.environ.get('METRICS_PORT', "9531"))
-ENCOPUS = int(os.environ.get('ENCOPUS', "1"))
+ENCOPUS = int(os.environ.get('ENCOPUS', True))
+S3 = int(os.environ.get('S3', False))
 
 logging.basicConfig(level=LOG_LEVEL)
 log = logging.getLogger('KZDROE')
@@ -53,6 +56,8 @@ metrics.info('app_info', 'Application info', version=__version__)
 metrics.register_endpoint('/metrics')
 metrics.start_http_server(METRICS_PORT)
 
+if S3:
+    from kzdroe.s3 import upload_file
 
 @app.route('/ping', methods=['GET'])
 def ping():
@@ -69,9 +74,18 @@ def ping():
         'userid': lambda: request.view_args['userid'],
         'status': lambda resp: resp.status_code
     })
-def upload(accountid, userid, recfile):
-    dstpath = "tmp/" + accountid + "/" + userid 
+def upload(accountid, userid, recfile, calldatetime=datetime.now()):
+    result={}
+    dstpath = (
+        "rec/" + 
+        accountid + 
+        "/" + 
+        userid + 
+        calldatetime.strftime("/%Y/%m/%d/%H")
+    )
     dstfile = dstpath + "/" + recfile
+    result['srcfile']=recfile
+    result['dstfile']=dstfile
     if not os.path.exists(dstpath):
         os.makedirs(dstpath)
     with open(dstfile, 'wb') as f:
@@ -98,11 +112,28 @@ def upload(accountid, userid, recfile):
                     opusdstfile
                 )
             )
-        return 'OK {} {}'.format(opusdstfile, request.path)
+            finalfile=opusdstfile
+            result["opusfile"]=opusdstfile
+            result["finalfile"]=opusdstfile
+            result['opus_transcode']=True
     else:
-        return 'OK {} {}'.format(dstfile, request.path)
+        finalfile=dstfile
+        result["finalfile"]=dstfile
+        result['opus_transcode']=False
+    if S3:
+        if upload_file(finalfile,accountid):
+            result["s3_key"]="s3://" + accountid + "/" + finalfile
+            result["s3_upload"]=True
+        else:
+            result["s3_upload"]=False
+    return jsonify(result)
 
 if __name__ == '__main__':
+    if not (S3_ACCESS_KEY and S3_SECRET_KEY):
+        log.error(
+            "ERROR: for S3 storage need S3_ACCESS_KEY and S3_SECRET_KEY"
+        )
+        exit(1)
     if ENCOPUS:
         if which('opusenc') is None:
             log.error("ERROR: opusenc not found in PATH - please make sure it's installed")

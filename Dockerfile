@@ -12,6 +12,7 @@ ENV NGINX_METRICS_PORT 9532
 ENV UWSGI_STATS_PORT 1717
 ENV prometheus_multiproc_dir /tmp
 ENV ENCOPUS 1
+ENV S3 0
 
 # set work directory
 WORKDIR /usr/src/app/
@@ -47,3 +48,18 @@ RUN python setup.py install
 # run entrypoint.sh
 # ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 # RUN apk del .build-deps
+
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name="kzdroe" \
+      org.label-schema.description="Here is a simple Python Flask for receiving a recording from doe.dialbox.cloud." \
+      org.label-schema.url="https://www.sapian.cloud/droe" \
+      org.label-schema.vcs-url="https://git.sapian.com.co/Sapian/kzdroe" \
+      org.label-schema.maintainer="sebastian.rojo@sapian.com.co" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vendor1="Sapian" \
+      org.label-schema.version=$VERSION \
+      org.label-schema.vicidial-schema-version="1"
