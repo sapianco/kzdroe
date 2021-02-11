@@ -8,7 +8,7 @@ image:
   repository: us.gcr.io/sapiancomco-1531131691088/sapian/kzdroe
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.3.1"
+  tag: "0.3.2"
 
 imagePullSecrets: []
 nameOverride: ""
