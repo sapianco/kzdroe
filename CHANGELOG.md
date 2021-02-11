@@ -1,3 +1,7 @@
+# 0.3.2
+
+* BETTER start_call time detection
+
 # 0.3.1
 
 * ADDED s3 uploadfile

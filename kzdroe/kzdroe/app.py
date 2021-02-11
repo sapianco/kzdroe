@@ -41,7 +41,7 @@ from shutil import copyfile, which
 from subprocess import Popen
 
 SOURCE_AUDIO_EXTENSIONS = ['.wav']
-
+GREGORIAN_SECONDS=62167219200
 LOG_LEVEL = os.environ.get('LOG_LEVEL', "INFO").upper()
 METRICS_PORT = int(os.environ.get('METRICS_PORT', "9531"))
 ENCOPUS = int(os.environ.get('ENCOPUS', True))
@@ -74,8 +74,19 @@ def ping():
         'userid': lambda: request.view_args['userid'],
         'status': lambda resp: resp.status_code
     })
-def upload(accountid, userid, recfile, calldatetime=datetime.now()):
+def upload(accountid, userid, recfile):
     result={}
+    now_greg_timestamp = datetime.now().timestamp() + GREGORIAN_SECONDS
+    start_greg_timestamp = request.args.get(
+        'start', 
+        default = now_greg_timestamp, 
+        type = int
+    )
+    result['start_greg_timestamp']=start_greg_timestamp
+    calldatetime=datetime.fromtimestamp(
+        start_greg_timestamp - GREGORIAN_SECONDS
+    )
+    result['calldatetime']=calldatetime
     dstpath = (
         "rec/" + 
         accountid + 
