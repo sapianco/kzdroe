@@ -34,6 +34,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: TZ
+              value: America/Bogota
           {{- if and .Values.kzdroe.s3.enabled .Values.kzdroe.s3.accessKey .Values.kzdroe.s3.secretKey }}
             - name: S3
               value: '1'
