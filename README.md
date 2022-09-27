@@ -2,6 +2,8 @@
 
 Here is a simple Python Flask for receiving a recording from doe.dialbox.cloud.
 
+<img src="docs/img/kzdroe-2022-09-26-0913.svg" alt="kzdroeBanner">
+
 # Build And Push to docker registry
 
 ``` Bash
